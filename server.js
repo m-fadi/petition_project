@@ -9,22 +9,21 @@ const PORT = 3000;
 app.use(express.urlencoded());
 app.use(express.static(path.join((__dirname, "views"))));
 app.use(express.static(path.join((__dirname, "public"))));
-const { createProfile, getProfiles, getName,userId } = require("./database/db.js");
+const { createProfile, getProfiles, getName } = require("./database/db.js");
 const cookieParser = require("cookie-parser");
 const { addAbortSignal } = require("stream");
 app.use(cookieParser());
 require("dotenv").config();
 //console.log(createProfile('fadi', 'marouf'));
 
-let counter=0
-const countUsers=(req,res,next)=>{
-    counter++;
-    console.log(counter)
-    
-    next()
-}
-//app.use(countUsers);
+// const countUsers=(req,res,next)=>{
+//     counter++;
+//     console.log(counter)
 
+//     next()
+// }
+//app.use(countUsers);
+let counter = 0;
 app.use(
     require("cookie-session")({
         secret: `I'm always angry.`,
@@ -37,7 +36,7 @@ app.get("/", (req, res) => {
     res.render("petition");
 });
 
-app.post("/", countUsers, (req, res) => {
+app.post("/", (req, res) => {
     ///if (req.cookies.value)
     //    { //console.log(req.cookies);
     //     return
@@ -50,28 +49,24 @@ app.post("/", countUsers, (req, res) => {
         req.session.lastName = user.lastname;
         req.session.userId = user.id;
         console.log("first", req.session.firstName);
+
         res.redirect("/thanks");
     });
     //res.cookie("value", "1");
 });
-app.get('/thanks',(req,res)=>{
-    const {firstName,lastName}=req.session
+app.get("/thanks", (req, res) => {
+    const { firstName, lastName, userId } = req.session;
+    console.log(userId);
     res.render("thanksForSigning", {
-        first:
-           firstName.charAt(0).toUpperCase() +
-            firstName.slice(1),
-        last:
-            lastName.charAt(0).toUpperCase() +
-            lastName.slice(1),
-        countUsers:counter
+        first: firstName.charAt(0).toUpperCase() + firstName.slice(1),
+        last: lastName.charAt(0).toUpperCase() + lastName.slice(1),
+        countUsers: userId,
     });
-})
+});
 
 app.get("/signed", (req, res) => {
     getProfiles().then((signers) => {
         res.render("signedPeople", { signers });
-        console.log(userId)
-
     });
 });
 

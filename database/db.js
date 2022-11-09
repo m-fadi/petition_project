@@ -10,7 +10,11 @@ const db = spicedPg(`postgres:${user}:${password}@localhost:5432/${database}`);
 function getProfiles() {
     return db.query("SELECT * FROM users").then((result) => result.rows);
 }
-
+// function CountUsers() {
+//     return db
+//         .query("SELECT count(*) FROM users ")
+//         .then((result) => result.rows[0]);
+// }
 function getName(name) {
     return db
         .query("SELECT * FROM users WHERE name = $1", [name])
@@ -37,5 +41,6 @@ module.exports = {
     createProfile,
     getProfiles,
     getName,
+    
     
 };
