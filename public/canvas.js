@@ -1,9 +1,9 @@
 window.addEventListener("load", () => {
     const canvas = document.querySelector("#canvas");
     const ctx = canvas.getContext("2d");
-    // ctx.strokeStyle = "green";
+    //  ctx.strokeStyle = "green";
     // ctx.lineWidth = 5;
-    //ctx.strokeRect(100, 50, 100, 200)
+    // ctx.strokeRect(100, 50, 100, 200)
 
     // ctx.beginPath();
     // ctx.moveTo(100, 100);
@@ -26,14 +26,15 @@ window.addEventListener("load", () => {
     const draw = (e) => {
         //console.log("painting");
         if (!painting) return;
-        console.log("painting");
+        console.log("X=", e.clientX);
+        console.log("y=", e.clientY);
         ctx.lineWidth = 5;
         ctx.lineCap = "round";
 
-        ctx.lineTo(e.clientX, e.clientY);
+        ctx.lineTo(e.clientX, e.clientY );
         ctx.stroke();
         ctx.beginPath(); // lines 35, 36 are not necessary , bt without them the line will be pixilated
-        ctx.lineTo(e.clientX - this.offsetLeft, e.clientY - this.offsetTop);
+        ctx.lineTo(e.clientX , e.clientY );
     };
     canvas.addEventListener("mousedown", startPosition);
     canvas.addEventListener("mouseup", endPosition);

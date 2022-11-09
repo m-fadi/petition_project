@@ -1,4 +1,7 @@
 const spicedPg = require("spiced-pg");
+const user = "fadoo";
+const password = "beshraghi";
+const database = "petition";
 
 // this establishes the connection to the db
 // it get's a connection string as an argument
@@ -23,7 +26,10 @@ function createProfile({ firstName, lastName }) {
             [firstName, lastName]
         )
         .then((result) => {
-            result.rows[0];
+            return result.rows[0];
+            //var userId = result.rows[0].id;
+              //var userId = result.rows[0].id;
+             //console.log(result.rows[0].id)
         });
 }
 
@@ -31,4 +37,5 @@ module.exports = {
     createProfile,
     getProfiles,
     getName,
+    
 };
