@@ -1,0 +1,10 @@
+{{> header}}
+
+<div class="signedPeople">
+{{#signers}}
+{{#if signed}}
+<h3> you already signed </h3>
+{{/if}}
+    <h4> {{firstname}} {{lastname}}</h4>
+{{/signers}}
+</div>
