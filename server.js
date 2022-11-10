@@ -66,22 +66,33 @@ app.post("/", (req, res) => {
             req.session.email = user.email;
             req.session.created_at = user.created_at;
 
-            //req.session.signature = user.signature;
-            console.log("first", signature);
-            res.redirect("/thanks");
+            res.redirect("/sign");
         }
     );
 });
+
 app.get("/sign", (req, res) => {
-    createSignatures(req.session.userId, signature).then((signature) =>
-        console.log("signatureData", signature)
+    //const cookie = req.cookies;
+
+    //if (cookie.session) res.redirect("/thanks");
+    res.render("sign");
+});
+app.post("/sign", (req, res) => {
+    userId=req.session.userId
+
+    let {signature}=req.body
+    console.log("reqBody",req.body.signature);
+    createSignatures({ userId, signature }).then(
+        signature
+
+        //console.log("signatureData", signature)
     );
-    res.redirect("/sign");
+    res.redirect("/thanks");
 });
 
 app.get("/thanks", (req, res) => {
     const { firstName, lastName, userId, signature } = req.session;
-    console.log(signature);
+    
     let msg = `${userId === 1 ? "person" : "people"} has already signed`;
     res.render("thanksForSigning", {
         first: firstName.charAt(0).toUpperCase() + firstName.slice(1),

@@ -29,7 +29,7 @@ function createUser({ firstName, lastName, email, password, created_at }) {
             [firstName, lastName, email, password, created_at]
         )
         .then((result) => {
-            console.log(result.rows[0]);
+           // console.log(result.rows[0]);
             return result.rows[0];
             //var userId = result.rows[0].id;
             //var userId = result.rows[0].id;
@@ -40,6 +40,7 @@ function createUser({ firstName, lastName, email, password, created_at }) {
 }
 
 function createSignatures({ userId, signature }) {
+    console.log("sig in db",signature)
     return db
         .query(
             `INSERT INTO signatures (userId, signature)
@@ -48,7 +49,7 @@ function createSignatures({ userId, signature }) {
             [userId, signature]
         )
         .then((result) => {
-            console.log(result.rows[0]);
+            //console.log(result.rows[0]);
             return result.rows[0];
             //var userId = result.rows[0].id;
             //var userId = result.rows[0].id;
