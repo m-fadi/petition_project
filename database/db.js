@@ -20,6 +20,12 @@ function getName(name) {
         .then((result) => result.rows[0]);
 }
 
+function getUserByEmail(email) {
+    return db
+        .query("SELECT * FROM users WHERE email = $1", [email])
+        .then((result) => result.rows[0]);
+}
+
 function createUser({ firstName, lastName, email, password, created_at }) {
     return db
         .query(
@@ -40,7 +46,7 @@ function createUser({ firstName, lastName, email, password, created_at }) {
 }
 
 function createSignatures({ userId, signature }) {
-    console.log("sig in db",signature)
+    //console.log("sig in db",signature)
     return db
         .query(
             `INSERT INTO signatures (userId, signature)
@@ -63,4 +69,5 @@ module.exports = {
     createSignatures,
     getProfiles,
     getName,
+    getUserByEmail,
 };

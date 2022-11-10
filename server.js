@@ -3,24 +3,19 @@ const path = require("path");
 const express = require("express");
 const app = express();
 const { engine, handlebars } = require("express-handlebars");
+var bcrypt = require('bcryptjs');
 app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
-
+const compare=require('./hash')
 app.use(express.urlencoded());
 app.use(express.static(path.join((__dirname, "views"))));
 app.use(express.static(path.join((__dirname, "public"))));
-const {
-    createUser,
-    getProfiles,
-    getName,
-    createSignatures,
-} = require("./database/db.js");
+
 const cookieParser = require("cookie-parser");
 const { addAbortSignal } = require("stream");
 const cookieSession = require("cookie-session");
 app.use(cookieParser());
 const { PORT } = process.env;
-
 
 app.use(
     require("cookie-session")({
@@ -29,14 +24,19 @@ app.use(
         sameSite: true,
     })
 );
-
-
+const {
+    createUser,
+    getProfiles,
+    getName,
+    createSignatures,
+    getUserByEmail,
+} = require("./database/db.js");
 
 // home route (registering)
 app.get("/", (req, res) => {
     const cookie = req.cookies;
 
-    if (cookie.session) res.redirect("/thanks");
+    if (cookie.session) res.redirect("/login");
     res.render("petition");
 });
 
@@ -47,7 +47,9 @@ app.post("/", (req, res) => {
     } // add partial to tell the user he/she to fill the fields?????
     // check if userId exist skip the register page to the login page
     const created_at = new Date();
+    //password = compare(password)
     createUser({ firstName, lastName, email, password, created_at }).then(
+        ///// add logic to hash the password?????////////
         (user) => {
             req.session.firstName = user.firstname;
             req.session.lastName = user.lastname;
@@ -61,24 +63,21 @@ app.post("/", (req, res) => {
 
 //signing petition route after regestering
 app.get("/sign", (req, res) => {
-    
     res.render("sign");
 });
 app.post("/sign", (req, res) => {
-    userId=req.session.userId
+    userId = req.session.userId;
 
-    let {signature}=req.body
-    console.log("reqBody",req.body.signature);
-    createSignatures({ userId, signature }).then(
-        signature
-    );
+    let { signature } = req.body;
+    console.log("reqBody", req.body.signature);
+    createSignatures({ userId, signature }).then(signature);
     res.redirect("/thanks");
 });
 
 // the Thanks route(after signing the petition)
 app.get("/thanks", (req, res) => {
     const { firstName, lastName, userId, signature } = req.session;
-    
+
     let msg = `${userId === 1 ? "person" : "people"} has already signed`;
     res.render("thanksForSigning", {
         first: firstName.charAt(0).toUpperCase() + firstName.slice(1),
@@ -95,22 +94,34 @@ app.get("/signers", (req, res) => {
     });
 });
 
-
-
 // login route
-app.get('/login', (req,res)=>{
+app.get("/login", (req, res) => {
     //let { firstName, lastName, email, password, signature } = req.body;
-})
-app.post("/sign", (req, res) => {
-    userId = req.session.userId;
+    res.render("login");
+    //const { email, password } = req.body;
+});
 
-    let { signature } = req.body;
-    console.log("reqBody", req.body.signature);
-    createSignatures({ userId, signature }).then(
-        signature
+//
+app.post("/login", (req, res) => {
+    const { email, password } = req.body;
+    getUserByEmail(email)
+        .then((user) => {
 
-    );
-    res.redirect("/thanks");
+            ////// logic to compare password and email???///////
+
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    // userId = req.session.userId;
+
+    // let { signature } = req.body;
+    // console.log("reqBody", req.body.signature);
+    // createSignatures({ userId, signature }).then(
+    //     signature
+
+    // );
+    // res.redirect("/thanks");
 });
 
 app.listen(PORT, () => {

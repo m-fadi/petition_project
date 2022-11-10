@@ -18,13 +18,20 @@ body{
     justify-content: center;
 }
 .input{
+    /* background-color:red; */
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: center; 
+    width:30%;
     
+    position:absolute;
+    left:250px;
+    
+    
+
     
 }
-.first, .last{
+.first, .last, .email, .password{
     display:flex;
     flex-direction: column;
     margin-right:20px;
@@ -40,11 +47,12 @@ body{
 .container{
     position:relative;
 }
-form{
+form .petition{
     position: absolute;
-    top:200px;
+    height:500px;
     top:350px;
-}
+    background-color:blue;
+} 
 .sign{
     text-align: center;
     
