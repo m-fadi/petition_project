@@ -9,9 +9,15 @@ app.set("view engine", "handlebars");
 app.use(express.urlencoded());
 app.use(express.static(path.join((__dirname, "views"))));
 app.use(express.static(path.join((__dirname, "public"))));
-const { createProfile, getProfiles, getName } = require("./database/db.js");
+const {
+    createUser,
+    getProfiles,
+    getName,
+    createSignatures,
+} = require("./database/db.js");
 const cookieParser = require("cookie-parser");
 const { addAbortSignal } = require("stream");
+const cookieSession = require("cookie-session");
 app.use(cookieParser());
 const { PORT } = process.env;
 //console.log(createProfile('fadi', 'marouf'));
@@ -23,7 +29,7 @@ const { PORT } = process.env;
 //     next()
 // }
 //app.use(countUsers);
-let counter = 0;
+
 app.use(
     require("cookie-session")({
         secret: `I'm always angry.`,
@@ -33,9 +39,9 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-    const cookie = req.cookies
-    
-    if(cookie.session) res.redirect("/thanks");
+    const cookie = req.cookies;
+
+    if (cookie.session) res.redirect("/thanks");
     res.render("petition");
 });
 
@@ -45,37 +51,50 @@ app.post("/", (req, res) => {
     //     return
     //     }
 
-    let { firstName, lastName, signature } = req.body;
-console.log(signature)
-    if(!firstName&& !lastName&& !signature){
-        res.redirect("/")
-        return
-    }
-    
-    console.log(signature);
-    createProfile({ firstName, lastName, signature }).then((user) => {
-        req.session.firstName = user.firstname;
-        req.session.lastName = user.lastname;
-        req.session.userId = user.id;
-        console.log("first", req.session);
+    let { firstName, lastName, email, password, signature } = req.body;
 
-        res.redirect("/thanks");
-    });
+    if (!firstName && !lastName && !signature) {
+        res.redirect("/");
+    } // add partial to tell the user he/she to fill the fields?????
+    // check if userId exist scip the register page to the login page
+    const created_at = new Date();
+    createUser({ firstName, lastName, email, password, created_at }).then(
+        (user) => {
+            req.session.firstName = user.firstname;
+            req.session.lastName = user.lastname;
+            req.session.userId = user.id;
+            req.session.email = user.email;
+            req.session.created_at = user.created_at;
+
+            //req.session.signature = user.signature;
+            console.log("first", signature);
+            res.redirect("/thanks");
+        }
+    );
 });
+app.get("/sign", (req, res) => {
+    createSignatures(req.session.userId, signature).then((signature) =>
+        console.log("signatureData", signature)
+    );
+    res.redirect("/sign");
+});
+
 app.get("/thanks", (req, res) => {
-    const { firstName, lastName, userId } = req.session;
+    const { firstName, lastName, userId, signature } = req.session;
+    console.log(signature);
     let msg = `${userId === 1 ? "person" : "people"} has already signed`;
     res.render("thanksForSigning", {
         first: firstName.charAt(0).toUpperCase() + firstName.slice(1),
         last: lastName.charAt(0).toUpperCase() + lastName.slice(1),
         countUsers: userId,
         thanksMsg: msg,
+        signature: signature,
     });
 });
 
-app.get("/signed", (req, res) => {
+app.get("/signers", (req, res) => {
     getProfiles().then((signers) => {
-        res.render("signedPeople", { signers });
+        res.render("signers", { signers });
     });
 });
 

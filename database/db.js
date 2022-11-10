@@ -1,6 +1,6 @@
 const spicedPg = require("spiced-pg");
 require("dotenv").config();
-const { USER,PASSWORD,DATABASE} = process.env;
+const { USER, PASSWORD, DATABASE } = process.env;
 
 // this establishes the connection to the db
 // it get's a connection string as an argument
@@ -20,27 +20,46 @@ function getName(name) {
         .then((result) => result.rows[0]);
 }
 
-function createProfile({ firstName, lastName , signature }) {
+function createUser({ firstName, lastName, email, password, created_at }) {
     return db
         .query(
-            `INSERT INTO users (firstName, lastName, signature)
-    VALUES ($1, $2, $3)
+            `INSERT INTO users (firstName, lastName, email,password,created_at)
+    VALUES ($1, $2, $3,$4,$5)
     RETURNING *`,
-            [firstName, lastName, signature]
+            [firstName, lastName, email, password, created_at]
         )
         .then((result) => {
             console.log(result.rows[0]);
             return result.rows[0];
             //var userId = result.rows[0].id;
-              //var userId = result.rows[0].id;
-             
+            //var userId = result.rows[0].id;
+        })
+        .catch((error) => {
+            console.log(error);
         });
 }
 
+function createSignatures({ userId, signature }) {
+    return db
+        .query(
+            `INSERT INTO signatures (userId, signature)
+    VALUES ($1, $2)
+    RETURNING *`,
+            [userId, signature]
+        )
+        .then((result) => {
+            console.log(result.rows[0]);
+            return result.rows[0];
+            //var userId = result.rows[0].id;
+            //var userId = result.rows[0].id;
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
 module.exports = {
-    createProfile,
+    createUser,
+    createSignatures,
     getProfiles,
     getName,
-    
-    
 };
