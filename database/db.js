@@ -1,11 +1,10 @@
 const spicedPg = require("spiced-pg");
-const user = "fadoo";
-const password = "beshraghi";
-const database = "petition";
+require("dotenv").config();
+const { USER,PASSWORD,DATABASE} = process.env;
 
 // this establishes the connection to the db
 // it get's a connection string as an argument
-const db = spicedPg(`postgres:${user}:${password}@localhost:5432/${database}`);
+const db = spicedPg(`postgres:${USER}:${PASSWORD}@localhost:5432/${DATABASE}`);
 
 function getProfiles() {
     return db.query("SELECT * FROM users").then((result) => result.rows);
@@ -21,19 +20,20 @@ function getName(name) {
         .then((result) => result.rows[0]);
 }
 
-function createProfile({ firstName, lastName }) {
+function createProfile({ firstName, lastName , signature }) {
     return db
         .query(
-            `INSERT INTO users (firstName, lastName)
-    VALUES ($1, $2)
+            `INSERT INTO users (firstName, lastName, signature)
+    VALUES ($1, $2, $3)
     RETURNING *`,
-            [firstName, lastName]
+            [firstName, lastName, signature]
         )
         .then((result) => {
+            console.log(result.rows[0]);
             return result.rows[0];
             //var userId = result.rows[0].id;
               //var userId = result.rows[0].id;
-             //console.log(result.rows[0].id)
+             
         });
 }
 

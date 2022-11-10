@@ -5,7 +5,7 @@ const app = express();
 const { engine, handlebars } = require("express-handlebars");
 app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
-const PORT = 3000;
+
 app.use(express.urlencoded());
 app.use(express.static(path.join((__dirname, "views"))));
 app.use(express.static(path.join((__dirname, "public"))));
@@ -13,7 +13,7 @@ const { createProfile, getProfiles, getName } = require("./database/db.js");
 const cookieParser = require("cookie-parser");
 const { addAbortSignal } = require("stream");
 app.use(cookieParser());
-require("dotenv").config();
+const { PORT } = process.env;
 //console.log(createProfile('fadi', 'marouf'));
 
 // const countUsers=(req,res,next)=>{
@@ -33,6 +33,9 @@ app.use(
 );
 
 app.get("/", (req, res) => {
+    const cookie = req.cookies
+    
+    if(cookie.session) res.redirect("/thanks");
     res.render("petition");
 });
 
@@ -42,25 +45,31 @@ app.post("/", (req, res) => {
     //     return
     //     }
 
-    const { firstName, lastName } = req.body;
-    //console.log(firstName);
-    createProfile({ firstName, lastName }).then((user) => {
+    let { firstName, lastName, signature } = req.body;
+console.log(signature)
+    if(!firstName&& !lastName&& !signature){
+        res.redirect("/")
+        return
+    }
+    
+    console.log(signature);
+    createProfile({ firstName, lastName, signature }).then((user) => {
         req.session.firstName = user.firstname;
         req.session.lastName = user.lastname;
         req.session.userId = user.id;
-        console.log("first", req.session.firstName);
+        console.log("first", req.session);
 
         res.redirect("/thanks");
     });
-    //res.cookie("value", "1");
 });
 app.get("/thanks", (req, res) => {
     const { firstName, lastName, userId } = req.session;
-    console.log(userId);
+    let msg = `${userId === 1 ? "person" : "people"} has already signed`;
     res.render("thanksForSigning", {
         first: firstName.charAt(0).toUpperCase() + firstName.slice(1),
         last: lastName.charAt(0).toUpperCase() + lastName.slice(1),
         countUsers: userId,
+        thanksMsg: msg,
     });
 });
 
