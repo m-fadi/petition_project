@@ -30,6 +30,7 @@ const {
     getName,
     createSignatures,
     getUserByEmail,
+    createUserProfile,
 } = require("./database/db.js");
 
 // home route (registering)
@@ -56,21 +57,36 @@ app.post("/", (req, res) => {
                 req.session.userId = user.id;
                 req.session.email = user.email;
                 req.session.created_at = user.created_at;
-                res.redirect("/sign");
+                res.redirect("/user_profile");
             }
         );
     });
 });
 
-//signing petition route after regestering
-app.get("/sign", (req, res) => {
-    res.render("sign");
+// route to users profile data
+app.get("/user_profile", (req, res) => {
+    res.render("user_profile");
 });
-app.post("/sign", (req, res) => {
+app.post("/user_profile", (req, res) => {
+
+    user_id = req.session.userId;
+    const { age, city, homepage } = req.body;
+    console.log(req.body, user_id)
+    createUserProfile({ age, city, homepage, user_id })
+        .then((user) => console.log(user))
+        .catch((error) => { res.statusCode(400)});
+    res.render("sign_petition");
+});
+
+//signing petition route after regestering
+app.get("/sign_petition", (req, res) => {
+    res.render("sign_petition");
+});
+app.post("/sign_petition", (req, res) => {
     userId = req.session.userId;
 
     let { signature } = req.body;
-    console.log("reqBody", req.body.signature);
+    //console.log("reqBody", req.body.signature);
     createSignatures({ userId, signature }).then(signature);
     res.redirect("/thanks");
 });
@@ -78,7 +94,7 @@ app.post("/sign", (req, res) => {
 // the Thanks route(after signing the petition)
 app.get("/thanks", (req, res) => {
     const { firstName, lastName, userId, signature } = req.session;
-
+    //console.log(signature);
     let msg = `${userId === 1 ? "person" : "people"} has already signed`;
     res.render("thanksForSigning", {
         first: firstName.charAt(0).toUpperCase() + firstName.slice(1),
@@ -101,37 +117,24 @@ app.get("/login", (req, res) => {
     res.render("login");
     //const { email, password } = req.body;
 });
-
-//
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
     getUserByEmail(email)
         .then((user) => {
-            console.log(user.email)
-            //    if (compare(password,user.password)&& email===user.email){
-            //        res.redirect('/thanks');
-
-            //    }
+            //console.log(user)
+            if (!user) {
+                let wrongData = true;
+                return res.render("login", { wrongData });
+            }
             bcrypt.compare(password, user.password).then(function (result) {
-                
-                if (result && user.email===email  ) res.redirect("/thanks");
-                 else res.redirect("/login");
+                if (result) res.redirect("/thanks");
+                else res.redirect("/login");
             });
-
             ////// logic to compare password and email???///////
         })
         .catch((error) => {
             res.sendStatus(401);
         });
-    // userId = req.session.userId;
-
-    // let { signature } = req.body;
-    // console.log("reqBody", req.body.signature);
-    // createSignatures({ userId, signature }).then(
-    //     signature
-
-    // );
-    // res.redirect("/thanks");
 });
 
 app.listen(PORT, () => {

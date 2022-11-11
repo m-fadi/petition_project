@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS users;
 
 DROP TABLE IF EXISTS signatures;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS users_profiles;
 
 CREATE TABLE signatures (
     id SERIAL PRIMARY KEY,
@@ -20,3 +21,16 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE users_profiles(
+    id SERIAL PRIMARY KEY,
+    age VARCHAR(255) NOT NULL,
+    city VARCHAR(255) NOT NULL,
+    homepage VARCHAR(255) NOT NULL,
+    user_id INT REFERENCES users(id)
+);
+
+--  psql -d petition -f database/petition.sql;
+-- //sudo su postgres
+-- TRUNCATE users RESTART IDENTITY;
+-- delete  from users
+-- validater.validate(email validation)

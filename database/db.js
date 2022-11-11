@@ -23,7 +23,8 @@ function getName(name) {
 function getUserByEmail(email) {
     return db
         .query("SELECT * FROM users WHERE email = $1", [email])
-        .then((result) => result.rows[0]);
+        .then((result) => result.rows[0])
+        .catch((error) => console.log("XXXXXXXXXX",error));
 }
 
 function createUser({ firstName, lastName, email, password, created_at }) {
@@ -64,10 +65,31 @@ function createSignatures({ userId, signature }) {
             console.log(error);
         });
 }
+
+function createUserProfile({ user_id, age,city,homepage }) {
+    //console.log("sig in db",signature)
+    return db
+        .query(
+            `INSERT INTO users_profiles(user_id, age,city,homepage)
+    VALUES ($1, $2, $3,$4 )
+    RETURNING *`,
+            [user_id, age,city,homepage]
+        )
+        .then((result) => {
+            console.log(result.rows[0]);
+            return result.rows[0];
+            //var userId = result.rows[0].id;
+            //var userId = result.rows[0].id;
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
 module.exports = {
     createUser,
     createSignatures,
     getProfiles,
     getName,
     getUserByEmail,
+    createUserProfile,
 };

@@ -1,5 +1,8 @@
 
 <form  class="login" method="POST" name="sign">
+    {{#if wrongData}}
+    {{> wrongloginData}}
+    {{/if }}
         <div class="input">
             
             <div class="email">
@@ -10,7 +13,7 @@
                 <input type="text" class="password"  name="password" />
                 <label for="password"> password</label>
             </div>
-            <input class="submit" type="submit" />
+            <input class="submit" type="submit"  value="login"/>
         </div>
 
         

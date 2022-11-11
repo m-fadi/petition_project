@@ -6,4 +6,8 @@ exports.hash = (password) => {
     });
 };
 
-exports.compare = bcrypt.compare;
+// exports.compare = bcrypt
+//     .compare(myPlaintextPassword, hash)
+//     .then(function (result) {
+//         // result == true
+//     });
