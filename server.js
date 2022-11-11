@@ -6,7 +6,7 @@ const { engine, handlebars } = require("express-handlebars");
 var bcrypt = require('bcryptjs');
 app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
-const compare=require('./hash')
+const {hash, compare}=require('./hash')
 app.use(express.urlencoded());
 app.use(express.static(path.join((__dirname, "views"))));
 app.use(express.static(path.join((__dirname, "public"))));
@@ -47,18 +47,22 @@ app.post("/", (req, res) => {
     } // add partial to tell the user he/she to fill the fields?????
     // check if userId exist skip the register page to the login page
     const created_at = new Date();
-    //password = compare(password)
-    createUser({ firstName, lastName, email, password, created_at }).then(
-        ///// add logic to hash the password?????////////
-        (user) => {
-            req.session.firstName = user.firstname;
-            req.session.lastName = user.lastname;
-            req.session.userId = user.id;
-            req.session.email = user.email;
-            req.session.created_at = user.created_at;
-            res.redirect("/sign");
-        }
-    );
+    hash(password).then((password=>{
+
+        createUser({ firstName, lastName, email, password, created_at }).then(
+            ///// add logic to hash the password?????////////
+            (user) => {
+                req.session.firstName = user.firstname;
+                req.session.lastName = user.lastname;
+                req.session.userId = user.id;
+                req.session.email = user.email;
+                req.session.created_at = user.created_at;
+                res.redirect("/sign");
+            }
+        );
+    }))
+    
+    
 });
 
 //signing petition route after regestering
@@ -106,7 +110,7 @@ app.post("/login", (req, res) => {
     const { email, password } = req.body;
     getUserByEmail(email)
         .then((user) => {
-
+            
             ////// logic to compare password and email???///////
 
         })
