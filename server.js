@@ -3,10 +3,10 @@ const path = require("path");
 const express = require("express");
 const app = express();
 const { engine, handlebars } = require("express-handlebars");
-var bcrypt = require('bcryptjs');
+var bcrypt = require("bcryptjs");
 app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
-const {hash, compare}=require('./hash')
+const { hash, compare } = require("./hash");
 app.use(express.urlencoded());
 app.use(express.static(path.join((__dirname, "views"))));
 app.use(express.static(path.join((__dirname, "public"))));
@@ -47,8 +47,7 @@ app.post("/", (req, res) => {
     } // add partial to tell the user he/she to fill the fields?????
     // check if userId exist skip the register page to the login page
     const created_at = new Date();
-    hash(password).then((password=>{
-
+    hash(password).then((password) => {
         createUser({ firstName, lastName, email, password, created_at }).then(
             ///// add logic to hash the password?????////////
             (user) => {
@@ -60,9 +59,7 @@ app.post("/", (req, res) => {
                 res.redirect("/sign");
             }
         );
-    }))
-    
-    
+    });
 });
 
 //signing petition route after regestering
@@ -110,12 +107,21 @@ app.post("/login", (req, res) => {
     const { email, password } = req.body;
     getUserByEmail(email)
         .then((user) => {
-            
-            ////// logic to compare password and email???///////
+            console.log(user.email)
+            //    if (compare(password,user.password)&& email===user.email){
+            //        res.redirect('/thanks');
 
+            //    }
+            bcrypt.compare(password, user.password).then(function (result) {
+                
+                if (result && user.email===email  ) res.redirect("/thanks");
+                 else res.redirect("/login");
+            });
+
+            ////// logic to compare password and email???///////
         })
         .catch((error) => {
-            console.log(error);
+            res.sendStatus(401);
         });
     // userId = req.session.userId;
 
