@@ -24,7 +24,7 @@ function getUserByEmail(email) {
     return db
         .query("SELECT * FROM users WHERE email = $1", [email])
         .then((result) => result.rows[0])
-        .catch((error) => console.log("XXXXXXXXXX",error));
+        .catch((error) => console.log("XXXXXXXXXX", error));
 }
 
 function createUser({ firstName, lastName, email, password, created_at }) {
@@ -36,7 +36,7 @@ function createUser({ firstName, lastName, email, password, created_at }) {
             [firstName, lastName, email, password, created_at]
         )
         .then((result) => {
-           // console.log(result.rows[0]);
+            // console.log(result.rows[0]);
             return result.rows[0];
             //var userId = result.rows[0].id;
             //var userId = result.rows[0].id;
@@ -66,14 +66,35 @@ function createSignatures({ userId, signature }) {
         });
 }
 
-function createUserProfile({ user_id, age,city,homepage }) {
+function createUserProfile({ user_id, age, city, homepage }) {
     //console.log("sig in db",signature)
     return db
         .query(
             `INSERT INTO users_profiles(user_id, age,city,homepage)
     VALUES ($1, $2, $3,$4 )
     RETURNING *`,
-            [user_id, age,city,homepage]
+            [user_id, age, city, homepage]
+        )
+        .then((result) => {
+            console.log(result.rows[0]);
+            return result.rows[0];
+            //var userId = result.rows[0].id;
+            //var userId = result.rows[0].id;
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
+
+function createDataTable({ user_id, age, city, homepage }) {
+    //console.log("sig in db",signature)
+    return db
+        .query(
+            `SELECT users.firstname AS first, users.lastname AS last , users_profiles.city As user_city,users_profiles.age as user_age
+            FROM users
+                JOIN users_profiles
+                ON users.id = users_profiles.user_id;`,
+            [user_id, age, city, homepage]
         )
         .then((result) => {
             console.log(result.rows[0]);

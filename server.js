@@ -63,23 +63,23 @@ app.post("/", (req, res) => {
     });
 });
 
-// route to users profile data
+//route to users profile data
 app.get("/user_profile", (req, res) => {
     res.render("user_profile");
 });
 app.post("/user_profile", (req, res) => {
-
     user_id = req.session.userId;
     const { age, city, homepage } = req.body;
-    console.log(req.body, user_id)
+    //clear.log(req.body, user_id)
     createUserProfile({ age, city, homepage, user_id })
         .then((user) => console.log(user))
-        .catch((error) => { res.statusCode(400)});
-    res.render("sign_petition");
+        res.redirect("sign_petition");
+    
 });
 
 //signing petition route after regestering
 app.get("/sign_petition", (req, res) => {
+    if (!req.cookies.session) res.redirect("login");
     res.render("sign_petition");
 });
 app.post("/sign_petition", (req, res) => {
@@ -87,16 +87,17 @@ app.post("/sign_petition", (req, res) => {
 
     let { signature } = req.body;
     //console.log("reqBody", req.body.signature);
-    createSignatures({ userId, signature }).then(signature);
-    res.redirect("/thanks");
+    createSignatures({ userId, signature }).then()
+    res.redirect("thanks_for_signing");
 });
 
 // the Thanks route(after signing the petition)
-app.get("/thanks", (req, res) => {
+app.get("/thanks_for_signing", (req, res) => {
+    if (!req.cookies.session) res.redirect("login");
     const { firstName, lastName, userId, signature } = req.session;
     //console.log(signature);
     let msg = `${userId === 1 ? "person" : "people"} has already signed`;
-    res.render("thanksForSigning", {
+    res.render("thanks_for_signing", {
         first: firstName.charAt(0).toUpperCase() + firstName.slice(1),
         last: lastName.charAt(0).toUpperCase() + lastName.slice(1),
         countUsers: userId,
@@ -106,6 +107,7 @@ app.get("/thanks", (req, res) => {
 });
 
 app.get("/signers", (req, res) => {
+    if (!req.cookies.session) res.redirect("login");
     getProfiles().then((signers) => {
         res.render("signers", { signers });
     });
@@ -119,6 +121,7 @@ app.get("/login", (req, res) => {
 });
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
+    if (!req.cookies.session) res.redirect("login");
     getUserByEmail(email)
         .then((user) => {
             //console.log(user)
@@ -127,7 +130,7 @@ app.post("/login", (req, res) => {
                 return res.render("login", { wrongData });
             }
             bcrypt.compare(password, user.password).then(function (result) {
-                if (result) res.redirect("/thanks");
+                if (result) res.render("thanks_for_signing");
                 else res.redirect("/login");
             });
             ////// logic to compare password and email???///////
