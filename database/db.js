@@ -14,14 +14,12 @@ function updateUser(id) {
         .then();
     // .query(` select from users_profiles where `)
 }
-function getProfile(id) {
-    return db.query("SELECT * FROM users where id=users.id").then((result) => {
-        //console.log(result.rows[0])
-        return result.rows[0];
-    });
-}
-
-
+// function getProfile(id) {
+//     return db.query("SELECT * FROM users where id=$1",[id]).then((result) => {
+//         //console.log(result.rows[0])
+//         return result.rows[0];
+//     });
+// }
 
 function getName(name) {
     return db
@@ -83,7 +81,7 @@ function getSignature(userId) {
 
 function CountSigners() {
     return db.query("SELECT count(*) FROM signatures ").then((result) => {
-        console.log("countSigners at db",result.rows[0]);
+        console.log("countSigners at db", result.rows[0]);
         return result.rows[0];
     });
 }
@@ -107,7 +105,7 @@ function createUserProfile({ user_id, age, city, homepage }) {
 function createDataTable() {
     return db
         .query(
-            "SELECT users.firstname, users.lastname, users_profiles.age, users_profiles.city FROM users JOIN users_profiles ON users.id = users_profiles.user_id"
+            "SELECT users.firstname, users.lastname, users_profiles.age, users_profiles.city, users_profiles.homepage FROM users JOIN users_profiles ON users.id = users_profiles.user_id"
         )
         .then((result) => {
             return result.rows;
@@ -116,10 +114,32 @@ function createDataTable() {
             console.log(error);
         });
 }
+
+function getSignersByCity(city) {
+    return db
+        .query(
+            `SELECT users.firstname, users.lastname, users_profiles.age, users_profiles.city, users_profiles.homepage FROM users JOIN users_profiles ON users.id = users_profiles.user_id where city=$1 `,
+            [city]
+        )
+        .then((result) => {
+            console.log("signers at db by city", result.rows);
+            return result.rows;
+        });
+}
+//connection.query('SELECT ?; SELECT ?', [1, 2], function(err, results)
+// function getUserInfo(id){
+//     // Promise.all([db.query(` select * FROM users_profiles WHERE users_profiles.user_id=$1`,[id]),
+//     //      db.query(db.query(` select * FROM users WHERE users.id=$1`,[id]))]).then(([result1,result2])=>{console.log(result1,result2)})
+//     devicePixelRatio.query(
+//         `select * from users where users.id=$1, select * from users_profiles where users_profiles.user_id=$1`,
+//         [id]
+//     );
+//}
+//-- and .then(([result1, result2]) => {}
 module.exports = {
     createUser,
     createSignatures,
-    getProfile,
+    //getProfile,
     getName,
     getUserByEmail,
     createUserProfile,
@@ -127,4 +147,6 @@ module.exports = {
     updateUser,
     getSignature,
     CountSigners,
+    getSignersByCity,
+    //getUserInfo,
 };

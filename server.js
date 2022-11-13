@@ -35,6 +35,8 @@ const {
     updateUser,
     getSignature,
     CountSigners,
+    getSignersByCity,
+     //getUserInfo,
 } = require("./database/db.js");
  let signed=false;
 // home route (registering)
@@ -60,6 +62,8 @@ app.post("/", (req, res) => {
                 req.session.userId = user.id;
                 req.session.email = user.email;
                 req.session.created_at = user.created_at;
+                console.log(user.id)
+                //getUserInfo(user.id);///////////////////////////////
                 res.redirect("/user_profile");
             }
         );
@@ -85,7 +89,7 @@ app.post("/user_profile", (req, res) => {
 
             req.session.age = result.age;
             req.session.city = result.city;
-            req.session.user_id = result.user_id;
+            req.session.homepage = result.homepage;
             res.redirect("/sign_petition");
         });
 
@@ -122,7 +126,8 @@ app.post("/sign_petition", (req, res) => {
 // the Thanks route(after signing the petition)
 app.get("/thanks_for_signing", (req, res) => {
     if (!req.cookies.session) res.redirect("login");
-
+    //console.log("IDDDDDDD",req.session)
+    //getUserInfo(req.session.userId).then();////////////////////////////////////////
     const { firstName, lastName, userId } = req.session;
     CountSigners().then(result=> req.session.countSignatures=result.count)
     let msg
@@ -131,11 +136,10 @@ app.get("/thanks_for_signing", (req, res) => {
      getSignature(userId).then((result) => {  
         if(!result)  
             return
-            //console.log("result.rows",result.rows)
-           ///// wrong, this function return only one signature I need to count the signatures 
         signature= result.rows[0].signature
         const {countSignatures}=req.session
-         msg = `  ${(countSignatures === 1
+        console.log("result.rows", countSignatures);
+         msg = `  ${(countSignatures == 1
              ? "vote, you are the first to vote"
              : "  people has already signed")} `;
          res.render("thanks_for_signing", {
@@ -152,9 +156,19 @@ app.get("/thanks_for_signing", (req, res) => {
 app.get("/signers", (req, res) => {
     if (!req.cookies.session) res.redirect("login");
     createDataTable().then((signers) => {
+        //console.log("signers",signers)
         res.render("signers", { signers });
     });
    
+});
+
+app.get("/location/:city", (req, res) => {
+    
+    const city= req.params.city 
+    getSignersByCity(city).then(result=>{
+        console.log("SignersByCity",result)
+        res.render("signersByCity", { result });
+    })
 });
 
 // login route
