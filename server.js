@@ -165,9 +165,9 @@ app.get("/signers", (req, res) => {
 app.get("/location/:city", (req, res) => {
     
     const city= req.params.city 
-    getSignersByCity(city).then(result=>{
-        console.log("SignersByCity",result)
-        res.render("signersByCity", { result });
+    getSignersByCity(city).then(signersProfile=>{
+        console.log("SignersByCity",signersProfile)
+        res.render("signersByCity", { signersProfile});
     })
 });
 
