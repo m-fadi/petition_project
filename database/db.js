@@ -6,8 +6,18 @@ const { USER, PASSWORD, DATABASE } = process.env;
 // it get's a connection string as an argument
 const db = spicedPg(`postgres:${USER}:${PASSWORD}@localhost:5432/${DATABASE}`);
 
-function getProfiles() {
-    return db.query("SELECT * FROM users").then((result) => result.rows);
+function updateUser(id) {
+    return db
+        .query(`DELETE FROM users_profiles WHERE users_profiles.user_id=$1`,[id])
+        .then();
+       // .query(` select from users_profiles where `)
+        
+}
+function getProfile(id) {
+    return db.query("SELECT * FROM users where id=users.id").then((result) => {
+        //console.log(result.rows[0])
+    return result.rows[0]
+});
 }
 // function CountUsers() {
 //     return db
@@ -28,7 +38,7 @@ function getUserByEmail(email) {
 }
 
 function createUser({ firstName, lastName, email, password, created_at }) {
-    return db
+    return db // HOW TO CHECK IF THE USERId already exist in the table????
         .query(
             `INSERT INTO users (firstName, lastName, email,password,created_at)
     VALUES ($1, $2, $3,$4,$5)
@@ -36,10 +46,9 @@ function createUser({ firstName, lastName, email, password, created_at }) {
             [firstName, lastName, email, password, created_at]
         )
         .then((result) => {
-            // console.log(result.rows[0]);
+           
             return result.rows[0];
-            //var userId = result.rows[0].id;
-            //var userId = result.rows[0].id;
+        
         })
         .catch((error) => {
             console.log(error);
@@ -47,7 +56,7 @@ function createUser({ firstName, lastName, email, password, created_at }) {
 }
 
 function createSignatures({ userId, signature }) {
-    //console.log("sig in db",signature)
+    // HOW TO CHECK IF THE USERId already exist in the table????
     return db
         .query(
             `INSERT INTO signatures (userId, signature)
@@ -56,18 +65,28 @@ function createSignatures({ userId, signature }) {
             [userId, signature]
         )
         .then((result) => {
-            //console.log(result.rows[0]);
+
             return result.rows[0];
-            //var userId = result.rows[0].id;
-            //var userId = result.rows[0].id;
+
         })
         .catch((error) => {
             console.log(error);
         });
 }
+function getSignature(userId){
+    console.log(userId)
+     return db
+        .query("SELECT * FROM signatures WHERE signatures.userid = $1", [userId])
+        .then((result) => {
+            if (result.rowCount===0) return 0
+            //console.log("no user",typeof(result),result);
+            return result.rows[0]
+        }).catch(error=>console.log("no user",error))
+
+}
 
 function createUserProfile({ user_id, age, city, homepage }) {
-    //console.log("sig in db",signature)
+
     return db
         .query(
             `INSERT INTO users_profiles(user_id, age,city,homepage)
@@ -76,31 +95,33 @@ function createUserProfile({ user_id, age, city, homepage }) {
             [user_id, age, city, homepage]
         )
         .then((result) => {
-            console.log(result.rows[0]);
+            //console.log(result.rows[0]);
             return result.rows[0];
-            //var userId = result.rows[0].id;
-            //var userId = result.rows[0].id;
+
         })
         .catch((error) => {
             console.log(error);
         });
 }
 
-function createDataTable({ user_id, age, city, homepage }) {
-    //console.log("sig in db",signature)
+function createDataTable() {
+    
+
     return db
         .query(
-            `SELECT users.firstname AS first, users.lastname AS last , users_profiles.city As user_city,users_profiles.age as user_age
-            FROM users
-                JOIN users_profiles
-                ON users.id = users_profiles.user_id;`,
-            [user_id, age, city, homepage]
+            "SELECT users.firstname, users.lastname, users_profiles.age, users_profiles.city FROM users JOIN users_profiles ON users.id = users_profiles.user_id"
         )
+        // .query(
+        //     `SELECT users.firstname AS first, users.lastname AS last , users_profiles.city As user_city,users_profiles.age as user_age
+
+        //     FROM users
+        //         JOIN users_profiles
+        //         ON users.id = users_profiles.user_id;`,
+        //     [userId, age, city, firstname, lastname]
+        // )
         .then((result) => {
-            console.log(result.rows[0]);
-            return result.rows[0];
-            //var userId = result.rows[0].id;
-            //var userId = result.rows[0].id;
+           
+            return result.rows;
         })
         .catch((error) => {
             console.log(error);
@@ -109,8 +130,11 @@ function createDataTable({ user_id, age, city, homepage }) {
 module.exports = {
     createUser,
     createSignatures,
-    getProfiles,
+    getProfile,
     getName,
     getUserByEmail,
     createUserProfile,
+    createDataTable,
+    updateUser,
+    getSignature,
 };

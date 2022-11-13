@@ -1,16 +1,10 @@
 
 
-DROP TABLE IF EXISTS signatures;
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS users_profiles;
 
-CREATE TABLE signatures (
-    id SERIAL PRIMARY KEY,
-    -- first_name VARCHAR(255) NOT NULL,
-    -- last_name VARCHAR(255) NOT NULL,
-    signature text NOT NULL,
-    userid INT NOT NULL
-);
+DROP TABLE IF EXISTS users_profiles;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS signatures;
+
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -20,6 +14,15 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE signatures (
+    id SERIAL PRIMARY KEY ,
+    -- first_name VARCHAR(255) NOT NULL,
+    -- last_name VARCHAR(255) NOT NULL,
+    signature text NOT NULL,
+    userId INT NOT NULL 
+);
+
+
 
 CREATE TABLE users_profiles(
     id SERIAL PRIMARY KEY,
@@ -30,7 +33,10 @@ CREATE TABLE users_profiles(
 );
 
 --  psql -d petition -f database/petition.sql;
--- //sudo su postgres
--- TRUNCATE users RESTART IDENTITY;
--- delete  from users
+-- sudo su postgres;
+-- TRUNCATE users_profiles, users RESTART IDENTITY;
+-- delete  from users;
 -- validater.validate(email validation)
+-- sudo service postgresql start;
+
+-- how to check if if the current id in create signatures nd in users_profiles exist ????

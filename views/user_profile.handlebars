@@ -1,8 +1,10 @@
 {{> more_information}}
-
+{{#if dataNotValid}}
+{{>dataNotValid}}
+{{/if }}
 <div class="container">
 
-    <form  class="petition" method="POST" >
+    <form  class="petition" method="POST"  >
         <div class="input">
             <div class="first">
                 <input type="text" class="" name="age"  />
