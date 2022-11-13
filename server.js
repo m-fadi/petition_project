@@ -34,6 +34,7 @@ const {
     createDataTable,
     updateUser,
     getSignature,
+    CountSigners,
 } = require("./database/db.js");
  let signed=false;
 // home route (registering)
@@ -59,9 +60,6 @@ app.post("/", (req, res) => {
                 req.session.userId = user.id;
                 req.session.email = user.email;
                 req.session.created_at = user.created_at;
-
-                //console.log(signature)
-
                 res.redirect("/user_profile");
             }
         );
@@ -75,7 +73,6 @@ app.get("/user_profile", (req, res) => {
 app.post("/user_profile", (req, res) => {
     user_id = req.session.userId;
     const { age, city, homepage } = req.body;
-    //clear.log(req.body, user_id)
 
     if (isNaN(age)) {
         let dataNotValid = true;
@@ -83,11 +80,9 @@ app.post("/user_profile", (req, res) => {
         return;
     }
     updateUser(user_id).then(() => {
-        // delete data if exist and inject new data
+        // delete data if exist and inject new data// !!!!!!!!better way to do it is to update instead of delete!!!!!!
         createUserProfile({ age, city, homepage, user_id }).then((result) => {
-            //getProfile(user_id).then((user) => {
 
-            //console.log(user_id);
             req.session.age = result.age;
             req.session.city = result.city;
             req.session.user_id = result.user_id;
@@ -100,32 +95,17 @@ app.post("/user_profile", (req, res) => {
 
 //signing petition route after regestering
 app.get("/sign_petition", (req, res) => {
-    // !!!!!!!!here condition to check if user already signed !!! getsignature function instede of getProfile
-    // getProfile(req.session.user_id).then(user=>{
     console.log(req.session);
     if (!req.cookies.session) res.redirect("login");
     getSignature(req.session.userId).then((result) => {
-        //console.log("result of getSig", result);
         
         if(!result)  {
             res.render("sign_petition")
             return
     }
         res.redirect("/thanks_for_signing");
-        
-
 
     });
-    //     if(user_id) {
-
-    //         console.log("get pro",user.id);
-    //         console.log(user);
-
-    //         
-    //     }
-    // })
-
-    
     ;
 });
 
@@ -133,10 +113,8 @@ app.post("/sign_petition", (req, res) => {
     userId = req.session.userId;
 
     let { signature } = req.body;
-    //console.log("reqBody", req.body.signature);
     createSignatures({ userId, signature }).then((result) => {
         req.session.signature = result.signature;
-        //console.log("session in create sig", req.session);
     });
     res.redirect("/thanks_for_signing"); // !!!!!!!!problem redirect should be inside the (then) line 124 but it dont work, and like this the signature doesnt get passed to the next route
 });
@@ -145,43 +123,52 @@ app.post("/sign_petition", (req, res) => {
 app.get("/thanks_for_signing", (req, res) => {
     if (!req.cookies.session) res.redirect("login");
 
-    const { firstName, lastName, userId, signature } = req.session;
+    const { firstName, lastName, userId } = req.session;
+    CountSigners().then(result=> req.session.countSignatures=result.count)
+    let msg
+    let signature;
+   
+     getSignature(userId).then((result) => {  
+        if(!result)  
+            return
+            //console.log("result.rows",result.rows)
+           ///// wrong, this function return only one signature I need to count the signatures 
+        signature= result.rows[0].signature
+        const {countSignatures}=req.session
+         msg = `  ${(countSignatures === 1
+             ? "vote, you are the first to vote"
+             : "  people has already signed")} `;
+         res.render("thanks_for_signing", {
+             first: firstName.charAt(0).toUpperCase() + firstName.slice(1),
+             last: lastName.charAt(0).toUpperCase() + lastName.slice(1),
+             countSignatures: countSignatures,
+             thanksMsg: msg,
+             signature: signature,
+         });
+    })
 
-    //console.log("session in thanksFor",req.session);
-    let msg = `${userId === 1 ? "person" : "people"} has already signed`;
-    res.render("thanks_for_signing", {
-        first: firstName.charAt(0).toUpperCase() + firstName.slice(1),
-        last: lastName.charAt(0).toUpperCase() + lastName.slice(1),
-        countUsers: userId,
-        thanksMsg: msg,
-        signature: signature,
-    });
 });
 
 app.get("/signers", (req, res) => {
     if (!req.cookies.session) res.redirect("login");
-    //const {firstName, lastName, userId, city,age} = req.session
     createDataTable().then((signers) => {
-        //console.log(signers)
         res.render("signers", { signers });
     });
-    // getProfiles().then((signers) => {
-    //     res.render("signers", { signers });
-    // });
+   
 });
 
 // login route
 app.get("/login", (req, res) => {
-    //let { firstName, lastName, email, password, signature } = req.body;
+    
     res.render("login");
-    //const { email, password } = req.body;
+   
 });
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
     if (!req.cookies.session) res.redirect("login");
     getUserByEmail(email)
         .then((user) => {
-            //console.log(user)
+            
             if (!user) {
                 let wrongData = true;
                 return res.render("login", { wrongData });
@@ -190,7 +177,7 @@ app.post("/login", (req, res) => {
                 if (result) res.render("thanks_for_signing");
                 else res.redirect("/login");
             });
-            ////// logic to compare password and email???///////
+           
         })
         .catch((error) => {
             res.sendStatus(401);

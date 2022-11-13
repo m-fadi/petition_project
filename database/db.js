@@ -8,22 +8,21 @@ const db = spicedPg(`postgres:${USER}:${PASSWORD}@localhost:5432/${DATABASE}`);
 
 function updateUser(id) {
     return db
-        .query(`DELETE FROM users_profiles WHERE users_profiles.user_id=$1`,[id])
+        .query(`DELETE FROM users_profiles WHERE users_profiles.user_id=$1`, [
+            id,
+        ])
         .then();
-       // .query(` select from users_profiles where `)
-        
+    // .query(` select from users_profiles where `)
 }
 function getProfile(id) {
     return db.query("SELECT * FROM users where id=users.id").then((result) => {
         //console.log(result.rows[0])
-    return result.rows[0]
-});
+        return result.rows[0];
+    });
 }
-// function CountUsers() {
-//     return db
-//         .query("SELECT count(*) FROM users ")
-//         .then((result) => result.rows[0]);
-// }
+
+
+
 function getName(name) {
     return db
         .query("SELECT * FROM users WHERE name = $1", [name])
@@ -46,9 +45,7 @@ function createUser({ firstName, lastName, email, password, created_at }) {
             [firstName, lastName, email, password, created_at]
         )
         .then((result) => {
-           
             return result.rows[0];
-        
         })
         .catch((error) => {
             console.log(error);
@@ -65,28 +62,33 @@ function createSignatures({ userId, signature }) {
             [userId, signature]
         )
         .then((result) => {
-
             return result.rows[0];
-
         })
         .catch((error) => {
             console.log(error);
         });
 }
-function getSignature(userId){
-    console.log(userId)
-     return db
-        .query("SELECT * FROM signatures WHERE signatures.userid = $1", [userId])
+function getSignature(userId) {
+    console.log(userId);
+    return db
+        .query("SELECT * FROM signatures WHERE signatures.userid = $1", [
+            userId,
+        ])
         .then((result) => {
-            if (result.rowCount===0) return 0
-            //console.log("no user",typeof(result),result);
-            return result.rows[0]
-        }).catch(error=>console.log("no user",error))
+            if (result.rowCount === 0) return 0;
+            return result;
+        })
+        .catch((error) => console.log("no user", error));
+}
 
+function CountSigners() {
+    return db.query("SELECT count(*) FROM signatures ").then((result) => {
+        console.log("countSigners at db",result.rows[0]);
+        return result.rows[0];
+    });
 }
 
 function createUserProfile({ user_id, age, city, homepage }) {
-
     return db
         .query(
             `INSERT INTO users_profiles(user_id, age,city,homepage)
@@ -95,9 +97,7 @@ function createUserProfile({ user_id, age, city, homepage }) {
             [user_id, age, city, homepage]
         )
         .then((result) => {
-            //console.log(result.rows[0]);
             return result.rows[0];
-
         })
         .catch((error) => {
             console.log(error);
@@ -105,22 +105,11 @@ function createUserProfile({ user_id, age, city, homepage }) {
 }
 
 function createDataTable() {
-    
-
     return db
         .query(
             "SELECT users.firstname, users.lastname, users_profiles.age, users_profiles.city FROM users JOIN users_profiles ON users.id = users_profiles.user_id"
         )
-        // .query(
-        //     `SELECT users.firstname AS first, users.lastname AS last , users_profiles.city As user_city,users_profiles.age as user_age
-
-        //     FROM users
-        //         JOIN users_profiles
-        //         ON users.id = users_profiles.user_id;`,
-        //     [userId, age, city, firstname, lastname]
-        // )
         .then((result) => {
-           
             return result.rows;
         })
         .catch((error) => {
@@ -137,4 +126,5 @@ module.exports = {
     createDataTable,
     updateUser,
     getSignature,
+    CountSigners,
 };
