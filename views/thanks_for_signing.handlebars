@@ -2,8 +2,22 @@
 {{#if signed}}
 {{> alreadysigned}}
 {{/if }}
+<div class="thanks">
 <div class="thanks"><p> thank you <strong>{{first}} {{last}}</strong> for signing the petition</p>
 	<img id="sig-image" src="{{signature}}" alt="Your signature will go here!"/>
-    <a href="/signers"> <strong>{{countUsers}}{{thanksMsg}}</strong> </a>
+    <a href="/signers"> <strong>{{countSignatures}}{{thanksMsg}}</strong> </a>
+    <a href="/edit"> Edit your profile </a>
+   
 </div>
+
+ <form action="/deleteProfile"  class="edit-profile" method="POST" name="edit">
+        <div >
+            <input class="submit_link" type="submit" value =" Delete your profile"/>
+          
+        </div>
+
+        
+
+    </form>
+    </div>
 

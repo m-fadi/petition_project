@@ -8,10 +8,10 @@ DROP TABLE IF EXISTS signatures;
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    firstname VARCHAR(255) NOT NULL,
-    lastname VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    firstname VARCHAR(255) NOT NULL CHECK(firstname!=''),
+    lastname VARCHAR(255) NOT NULL CHECK(lastname!=''),
+    email VARCHAR(255) NOT NULL UNIQUE CHECK(email!=''),
+    password VARCHAR(255) NOT NULL CHECK(password!=''),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE signatures (
@@ -29,7 +29,7 @@ CREATE TABLE users_profiles(
     age int ,
     city VARCHAR(255) ,
     homepage VARCHAR(255) ,
-    user_id INT REFERENCES users(id)
+    user_id INT NULL UNIQUE  REFERENCES users(id)
 );
 
 --  psql -d petition -f database/petition.sql;
@@ -40,3 +40,21 @@ CREATE TABLE users_profiles(
 -- sudo service postgresql start;
 
 -- how to check if if the current id in create signatures nd in users_profiles exist ????
+
+
+
+-- Multiple Queries
+-- var connection = mysql.createConnection({multipleStatements: true});
+
+-- connection.query('SELECT ?; SELECT ?', [1, 2], function(err, results) {
+--   if (err) throw err;
+
+
+--   // `results` is an array with one element for every statement in the query:
+--   console.log(results[0]); // [{1: 1}]
+--   console.log(results[1]); // [{2: 2}]
+-- });
+
+
+-- Promise.all([client.query(...), client.query(..)]) 
+-- and .then(([result1, result2]) => {}

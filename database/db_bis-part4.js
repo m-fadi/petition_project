@@ -6,28 +6,14 @@ const { USER, PASSWORD, DATABASE } = process.env;
 // it get's a connection string as an argument
 const db = spicedPg(`postgres:${USER}:${PASSWORD}@localhost:5432/${DATABASE}`);
 
-function deleteUser(id) {
-    return db.query(`DELETE FROM users WHERE id=$1`, [id]).then();
-
-    // .query(` select from users_profiles where `)
-}
-
-function deleteUser_profile(id) {
+function updateUser(id) {
     return db
         .query(`DELETE FROM users_profiles WHERE users_profiles.user_id=$1`, [
             id,
         ])
         .then();
+    // .query(` select from users_profiles where `)
 }
-
-function deleteSignature(id) {
-    return db
-        .query(`DELETE FROM signatures WHERE userid=$1`, [
-            id,
-        ])
-        .then();
-}
-
 // function getProfile(id) {
 //     return db.query("SELECT * FROM users where id=$1",[id]).then((result) => {
 //         //console.log(result.rows[0])
@@ -140,63 +126,15 @@ function getSignersByCity(city) {
             return result.rows;
         });
 }
-
-function updateUserProfile({ age, city, homepage, user_id }) {
-    return db.query(
-        ` INSERT INTO users_profiles(age,city,homepage,user_id) 
-    VALUES ($1, $2, $3,$4) 
-    ON CONFLICT (user_id) 
-    DO UPDATE SET age=$1,city=$2,homepage=$3 
-    RETURNING *`,
-        [age, city, homepage, user_id]
-    );
-}
-
-function updateUserInfo({ firstName, lastName, email, user_id }) {
-    console.log(firstName, lastName, email, user_id);
-    return db.query(
-        //     `INSERT INTO users_profiles(age,city,homepage,user_id)
-        // VALUES ($1, $2, $3,$4)
-        // ON CONFLICT (user_id)
-        // DO UPDATE SET firstname=$1,lastname=$2,email=$6
-        // RETURNING *`,
-        `UPDATE users SET firstname=$1,lastname=$2,email=$3 where id=$4
-  
-   RETURNING *`,
-        [firstName, lastName, email, user_id]
-    );
-}
-
 //connection.query('SELECT ?; SELECT ?', [1, 2], function(err, results)
-// function getUserInfo({
-//     firstName,
-//     lastName,
-//     email,
-//     age,
-//     city,
-//     homepage,
-//     user_id,
-// }) {
-//     //console.log(id)
-//     console.log(firstName, lastName, email, age, city, homepage, user_id);
-
-//     return Promise.all([
-//         db.query(
-//             ` INSERT INTO users_profiles(age,city,homepage,user_id)
-//     VALUES ($4, $5, $6,$7)
-//     ON CONFLICT (user_id)
-//     DO UPDATE SET age=$4,city=$5,homepage=$6
-//     RETURNING *`,
-//             [age, city, homepage, user_id]
-//         ),
-//         db.query(
-//             ` UPDATE users SET (firstname,lastname,email)
-//     VALUES ($1, $2, $3) where id=$7
-//     RETURNING *`,
-//             [firstName, lastName, email]
-//         ),
-//     ]);
-// }
+// function getUserInfo(id){
+//     // Promise.all([db.query(` select * FROM users_profiles WHERE users_profiles.user_id=$1`,[id]),
+//     //      db.query(db.query(` select * FROM users WHERE users.id=$1`,[id]))]).then(([result1,result2])=>{console.log(result1,result2)})
+//     devicePixelRatio.query(
+//         `select * from users where users.id=$1, select * from users_profiles where users_profiles.user_id=$1`,
+//         [id]
+//     );
+//}
 //-- and .then(([result1, result2]) => {}
 module.exports = {
     createUser,
@@ -206,12 +144,9 @@ module.exports = {
     getUserByEmail,
     createUserProfile,
     createDataTable,
-    deleteUser,
+    updateUser,
     getSignature,
     CountSigners,
     getSignersByCity,
-    updateUserInfo,
-    updateUserProfile,
-    deleteUser_profile,
-    deleteSignature,
+    //getUserInfo,
 };

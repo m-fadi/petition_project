@@ -71,6 +71,26 @@ form .petition{
     position: absolute;
     top:50px;
 }
+.submit_link {
+    background: none !important;
+    border: none;
+    padding: 0 !important;
+    /*optional*/
+    font-family: arial, sans-serif;
+    /*input has OS specific font-family*/
+    color: #069;
+    text-decoration: underline;
+    cursor: pointer;
+    display:flex;
+    flex-direction: row;
+   
+}
+.edit-profile{
+    display: flex;
+    justify-content: center;
+    
+}
+
 
 
 

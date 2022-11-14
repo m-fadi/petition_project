@@ -1,5 +1,9 @@
 
 {{> header}}
+
+{{#if dataNotValid}}
+{{>wrongloginData}}
+{{/if }}
 <div class="container">
 
     <form  class="petition" method="POST" name="sign">
@@ -21,9 +25,11 @@
                 <input type="text" class="password"  name="password" />
                 <label for="password"> password</label>
             </div>
+            
             <input class="submit" type="submit" value =" Register"/>
         </div>
 
         
 
     </form>
+ </div>
