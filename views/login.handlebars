@@ -1,21 +1,24 @@
+<div class ="login">
 
-<form  class="login" method="POST" name="sign">
-    {{#if wrongData}}
-    {{> wrongloginData}}
-    {{/if }}
-        <div class="input">
-            
-            <div class="email">
-                <input type="text" class="email" name="email"  />
-                <label for="email"> Email</label>
+    <form  method="POST" name="sign">
+        {{#if wrongData}}
+        {{> wrongloginData}}
+        {{/if }}
+            <div class="input">
+                
+                <div class="email">
+                    <input type="text" class="email" name="email"  />
+                    <label for="email"> Email</label>
+                </div>
+                <div class="password">
+                    <input type="text" class="password"  name="password" />
+                    <label for="password"> password</label>
+                </div>
+                <input class="submit" type="submit"  value="login"/>
             </div>
-            <div class="password">
-                <input type="text" class="password"  name="password" />
-                <label for="password"> password</label>
-            </div>
-            <input class="submit" type="submit"  value="login"/>
-        </div>
-
-        
-
     </form>
+        
+        
+       <a class="sign_up" href="/sign_up"> if you are not Registered, please sign up here</a>
+
+</div>

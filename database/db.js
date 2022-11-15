@@ -21,19 +21,15 @@ function deleteUser_profile(id) {
 }
 
 function deleteSignature(id) {
-    return db
-        .query(`DELETE FROM signatures WHERE userid=$1`, [
-            id,
-        ])
-        .then();
+    return db.query(`DELETE FROM signatures WHERE userid=$1`, [id]).then();
 }
 
-// function getProfile(id) {
-//     return db.query("SELECT * FROM users where id=$1",[id]).then((result) => {
-//         //console.log(result.rows[0])
-//         return result.rows[0];
-//     });
-// }
+function getProfile(id) {
+    return db.query("SELECT * FROM users_profiles where user_id=$1",[id]).then((result) => {
+        //console.log("userProfile from getProfile",result.rows[0])
+        return result.rows[0];
+    });
+}
 
 function getName(name) {
     return db
@@ -51,10 +47,16 @@ function getUserByEmail(email) {
 function createUser({ firstName, lastName, email, password, created_at }) {
     return db // HOW TO CHECK IF THE USERId already exist in the table????
         .query(
-            `INSERT INTO users (firstName, lastName, email,password,created_at)
-    VALUES ($1, $2, $3,$4,$5)
-    RETURNING *`,
-            [firstName, lastName, email, password, created_at]
+                    `INSERT INTO users (firstName, lastName, email,password,created_at)
+            VALUES ($1, $2, $3,$4,$5)
+            RETURNING *`,
+                    [firstName, lastName, email, password, created_at]
+            // ` INSERT INTO users(firstname, lastname, email, password, created_at)
+            // VALUES ($1, $2, $3,$4,$5)
+            // ON CONFLICT (id)
+            // DO UPDATE SET firstname=$1,lastname=$2,email=$3,password=$4,created_at=$5
+            // RETURNING *`,
+            // [firstName, lastName, email, password, created_at]
         )
         .then((result) => {
             return result.rows[0];
@@ -103,10 +105,16 @@ function CountSigners() {
 function createUserProfile({ user_id, age, city, homepage }) {
     return db
         .query(
-            `INSERT INTO users_profiles(user_id, age,city,homepage)
-    VALUES ($1, $2, $3,$4 )
-    RETURNING *`,
-            [user_id, age, city, homepage]
+                    `INSERT INTO users_profiles(user_id, age,city,homepage)
+            VALUES ($1, $2, $3,$4 )
+            RETURNING *`,
+                    [user_id, age, city, homepage]
+            // ` INSERT INTO users_profiles(user_id,age,city,homepage)
+            // VALUES ($1, $2, $3,$4)
+            // ON CONFLICT (user_id)
+            // DO UPDATE SET age=$1,city=$2,homepage=$3
+            // RETURNING *`,
+            // [user_id, age, city, homepage]
         )
         .then((result) => {
             return result.rows[0];
@@ -167,41 +175,11 @@ function updateUserInfo({ firstName, lastName, email, user_id }) {
     );
 }
 
-//connection.query('SELECT ?; SELECT ?', [1, 2], function(err, results)
-// function getUserInfo({
-//     firstName,
-//     lastName,
-//     email,
-//     age,
-//     city,
-//     homepage,
-//     user_id,
-// }) {
-//     //console.log(id)
-//     console.log(firstName, lastName, email, age, city, homepage, user_id);
 
-//     return Promise.all([
-//         db.query(
-//             ` INSERT INTO users_profiles(age,city,homepage,user_id)
-//     VALUES ($4, $5, $6,$7)
-//     ON CONFLICT (user_id)
-//     DO UPDATE SET age=$4,city=$5,homepage=$6
-//     RETURNING *`,
-//             [age, city, homepage, user_id]
-//         ),
-//         db.query(
-//             ` UPDATE users SET (firstname,lastname,email)
-//     VALUES ($1, $2, $3) where id=$7
-//     RETURNING *`,
-//             [firstName, lastName, email]
-//         ),
-//     ]);
-// }
-//-- and .then(([result1, result2]) => {}
 module.exports = {
     createUser,
     createSignatures,
-    //getProfile,
+    getProfile,
     getName,
     getUserByEmail,
     createUserProfile,

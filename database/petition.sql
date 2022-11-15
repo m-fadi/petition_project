@@ -58,3 +58,9 @@ CREATE TABLE users_profiles(
 
 -- Promise.all([client.query(...), client.query(..)]) 
 -- and .then(([result1, result2]) => {}
+
+
+
+-- delete sig-imagedelete cookie after delte profile // noSignature 233 notb rendering!!!!
+-- login with regester !!!!
+-- cookioe not added by login????

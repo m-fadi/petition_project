@@ -37,7 +37,7 @@ function getUserByEmail(email) {
 function createUser({ firstName, lastName, email, password, created_at }) {
     return db // HOW TO CHECK IF THE USERId already exist in the table????
         .query(
-            `INSERT INTO users (firstName, lastName, email,password,created_at)
+            `INSERT INTO users (firstname, lastname, email,password,created_at)
     VALUES ($1, $2, $3,$4,$5)
     RETURNING *`,
             [firstName, lastName, email, password, created_at]
