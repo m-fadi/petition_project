@@ -4,7 +4,7 @@ const { USER, PASSWORD, DATABASE } = process.env;
 
 // this establishes the connection to the db
 // it get's a connection string as an argument
-const db = spicedPg(`postgres:${USER}:${PASSWORD}@localhost:5432/${DATABASE}`);
+const db = spicedPg( process.env.DATABASE_URL||`postgres:${USER}:${PASSWORD}@localhost:5432/${DATABASE}`);
 
 function deleteUser(id) {
     return db.query(`DELETE FROM users WHERE id=$1`, [id]).then();
@@ -150,14 +150,14 @@ function getSignersByCity(city) {
         });
 }
 
-function updateUserProfile({ age, city, homepage, user_id }) {
+function updateUserProfile({ age, cityUpper, homepage, user_id }) {
     return db.query(
         ` INSERT INTO users_profiles(age,city,homepage,user_id) 
     VALUES ($1, $2, $3,$4) 
     ON CONFLICT (user_id) 
     DO UPDATE SET age=$1,city=$2,homepage=$3 
     RETURNING *`,
-        [age, city, homepage, user_id]
+        [age, cityUpper, homepage, user_id]
     );
 }
 
