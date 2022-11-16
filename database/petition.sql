@@ -26,7 +26,7 @@ CREATE TABLE signatures (
 
 CREATE TABLE users_profiles(
     id SERIAL PRIMARY KEY,
-    age int ,
+    age VARCHAR,
     city VARCHAR(255) ,
     homepage VARCHAR(255) ,
     user_id INT NULL UNIQUE  REFERENCES users(id)

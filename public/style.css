@@ -142,6 +142,9 @@ form .petition{
 
 
 }
+.wrongData,.wrongloginData{
+    color:red
+}
 
 
 

@@ -69,6 +69,7 @@ app.get("/login", (req, res) => {
 });
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
+
     // if (!req.cookies.session) res.redirect("login");
     getUserByEmail(email)
         .then((user) => {
@@ -98,14 +99,18 @@ app.post("/login", (req, res) => {
                 return noSignature;
             });
             console.log("NoSignature", noSignature);
-            bcrypt.compare(password, user.password).then(function (user) {
-                // req.session.userId=result
-                if (user) {
-                    return res.redirect("/thanks_for_signing");
-                } else {
-                    return res.redirect("/login");
-                }
-            });
+            bcrypt
+                .compare(password, user.password)
+                .then(function (passMatch) {
+                    // req.session.userId=result
+                    if (passMatch) {
+                        return res.redirect("/thanks_for_signing");
+                    } else {
+                        let wrongData = true;
+                        return res.render("login", { wrongData });
+                    }
+                })
+                .catch((error) => console.log(error));
         })
         .catch((error) => {
             res.sendStatus(401);
@@ -128,10 +133,20 @@ app.get("/sign_up", (req, res) => {
 app.post("/sign_up", (req, res) => {
     let { firstName, lastName, email, password, signature } = req.body;
 
-    // if (firstName =="" || lastName=="" || signature=="") {
-    //     res.redirect("/");
-    // } // add partial to tell the user he/she to fill the fields?????
-    // check if userId exist skip the register page to the login page
+    if (
+        !firstName ||
+        !lastName ||
+        !email ||
+        !password ||
+        firstName == " " ||
+        lastName == " " ||
+        email == " " ||
+        password == " "
+    ) {
+        let dataNotValid = true;
+        res.render("sign_up", { dataNotValid });
+        return;
+    }
     const created_at = new Date();
     hash(password).then((password) => {
         createUser({ firstName, lastName, email, password, created_at }).then(
