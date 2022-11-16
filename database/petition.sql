@@ -43,24 +43,4 @@ CREATE TABLE users_profiles(
 
 
 
--- Multiple Queries
--- var connection = mysql.createConnection({multipleStatements: true});
-
--- connection.query('SELECT ?; SELECT ?', [1, 2], function(err, results) {
---   if (err) throw err;
-
-
---   // `results` is an array with one element for every statement in the query:
---   console.log(results[0]); // [{1: 1}]
---   console.log(results[1]); // [{2: 2}]
--- });
-
-
--- Promise.all([client.query(...), client.query(..)]) 
--- and .then(([result1, result2]) => {}
-
-
-
--- delete sig-imagedelete cookie after delte profile // noSignature 233 notb rendering!!!!
--- login with regester !!!!
--- cookioe not added by login????
+-- git push petition 

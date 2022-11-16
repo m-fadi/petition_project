@@ -4,7 +4,10 @@ const { USER, PASSWORD, DATABASE } = process.env;
 
 // this establishes the connection to the db
 // it get's a connection string as an argument
-const db = spicedPg( process.env.DATABASE_URL||`postgres:${USER}:${PASSWORD}@localhost:5432/${DATABASE}`);
+const db = spicedPg(
+    process.env.DATABASE_URL ||
+        `postgres:${USER}:${PASSWORD}@localhost:5432/${DATABASE}`
+);
 
 function deleteUser(id) {
     return db.query(`DELETE FROM users WHERE id=$1`, [id]).then();
@@ -25,10 +28,12 @@ function deleteSignature(id) {
 }
 
 function getProfile(id) {
-    return db.query("SELECT * FROM users_profiles where user_id=$1",[id]).then((result) => {
-        //console.log("userProfile from getProfile",result.rows[0])
-        return result.rows[0];
-    });
+    return db
+        .query("SELECT * FROM users_profiles where user_id=$1", [id])
+        .then((result) => {
+            //console.log("userProfile from getProfile",result.rows[0])
+            return result.rows[0];
+        });
 }
 
 function getName(name) {
@@ -47,10 +52,10 @@ function getUserByEmail(email) {
 function createUser({ firstName, lastName, email, password, created_at }) {
     return db // HOW TO CHECK IF THE USERId already exist in the table????
         .query(
-                    `INSERT INTO users (firstName, lastName, email,password,created_at)
+            `INSERT INTO users (firstName, lastName, email,password,created_at)
             VALUES ($1, $2, $3,$4,$5)
             RETURNING *`,
-                    [firstName, lastName, email, password, created_at]
+            [firstName, lastName, email, password, created_at]
             // ` INSERT INTO users(firstname, lastname, email, password, created_at)
             // VALUES ($1, $2, $3,$4,$5)
             // ON CONFLICT (id)
@@ -146,7 +151,7 @@ function getSignersByCity(city) {
         )
         .then((result) => {
             console.log("signers at db by city", result.rows);
-            return result.rows;
+            return result.rows; 
         });
 }
 
@@ -175,7 +180,6 @@ function updateUserInfo({ firstName, lastName, email, user_id }) {
         [firstName, lastName, email, user_id]
     );
 }
-
 
 module.exports = {
     createUser,

@@ -4,6 +4,9 @@
 {{#if dataNotValid}}
 {{>dataNotValid}}
 {{/if }}
+{{#if emailIsUsed}}
+{{>emailIsUsed}}
+{{/if }}
 <div class="container">
 
     <form  class="petition" method="POST" name="sign">
@@ -18,11 +21,11 @@
             </div>
             <input type="hidden" class="signature"  name="signature" />
             <div class="email">
-                <input type="text" class="email" name="email"  />
+                <input type="email" class="email" name="email"  />
                 <label for="email"> Email</label>
             </div>
             <div class="password">
-                <input type="text" class="password"  name="password" />
+                <input type="password" class="password"  name="password" />
                 <label for="password"> password</label>
             </div>
             
