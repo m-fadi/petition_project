@@ -56,11 +56,9 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-    
     if (!req.session.userId && req.url != "/login" && req.url != "/sign_up") {
         res.redirect("/login");
     } else {
-        
         next();
     }
 });
@@ -79,42 +77,34 @@ app.post("/login", (req, res) => {
                 let wrongData = true;
                 return res.render("login", { wrongData });
             }
-            
-            console.log("user after log in",user)
-            console.log("session after log in",req.session)
-             console.log("userrr", user);
-             req.session.firstName = user.firstname;
-             req.session.lastName = user.lastname;
-             req.session.userId = user.id;
-             req.session.email = user.email;
-             req.session.created_at = user.created_at;
-             //console.log("session after log in", req.session);
-            getProfile(user.id).then(user=>{
-                console.log("Profile in login",user)
+
+            req.session.firstName = user.firstname;
+            req.session.lastName = user.lastname;
+            req.session.userId = user.id;
+            req.session.email = user.email;
+            req.session.created_at = user.created_at;
+            //console.log("session after log in", req.session);
+            getProfile(user.id).then((user) => {
+                //console.log("Profile in login",user)
                 req.session.age = user.age;
                 req.session.city = user.city;
                 req.session.homepage = user.homepage;
-
             });
-            getSignature(user.id).then(user=>{
-                console.log("getsigffff",user)
-                if(!user.signature) {
-                    noSignature=false
-                }else{
-                    noSignature = true;
-                req.session.signature=user.signature;
-            }
-            })
+            getSignature(user.id).then((result) => {
+                if (!result) {
+                    return;
+                }
+                noSignature = false;
+                return noSignature;
+            });
+            console.log("NoSignature", noSignature);
             bcrypt.compare(password, user.password).then(function (user) {
                 // req.session.userId=result
                 if (user) {
-                   
-                     return res.render("thanks_for_signing", { noSignature })
+                    return res.redirect("/thanks_for_signing");
+                } else {
+                    return res.redirect("/login");
                 }
-                else {
-                    
-                   return  res.redirect("/login")
-                };
             });
         })
         .catch((error) => {
@@ -123,7 +113,6 @@ app.post("/login", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-    
     //const cookie = req.session.userId;
 
     //if (cookie) res.redirect("/login");
@@ -131,15 +120,14 @@ app.get("/", (req, res) => {
 });
 app.get("/sign_up", (req, res) => {
     //const cookie = req.cookies;
-    if(req.session.userId) res.redirect("/edit")
+    if (req.session.userId) res.redirect("/edit");
     //if (cookie.session) res.redirect("/login");
     res.render("sign_up");
 });
 
-
 app.post("/sign_up", (req, res) => {
     let { firstName, lastName, email, password, signature } = req.body;
-    
+
     // if (firstName =="" || lastName=="" || signature=="") {
     //     res.redirect("/");
     // } // add partial to tell the user he/she to fill the fields?????
@@ -161,13 +149,10 @@ app.post("/sign_up", (req, res) => {
     });
 });
 
-
 app.post("/logout", (req, res) => {
-    
     req.session = null;
-     res.redirect("login");
+    res.redirect("/login");
 });
-
 //route to users profile data
 app.get("/user_profile", (req, res) => {
     res.render("user_profile", { edit });
@@ -183,9 +168,11 @@ app.post("/user_profile", (req, res) => {
     }
 
     // delete data if exist and inject new data// !!!!!!!!better way to do it is to update instead of delete!!!!!!
-    createUserProfile({ age, city, homepage, user_id }).then((result) => {
+    cityUpper = city.charAt(0).toUpperCase() + city.slice(1).toLowerCase();
+    console.log(city);
+    createUserProfile({ age, cityUpper, homepage, user_id }).then((result) => {
         req.session.age = result.age;
-        req.session.city = result.city.toLowerCase();
+        req.session.city = result.city;
         req.session.homepage = result.homepage;
         res.redirect("/sign_petition");
     });
@@ -198,6 +185,7 @@ app.get("/sign_petition", (req, res) => {
     console.log(req.session);
     //if (!req.cookies.session) res.redirect("login");
     getSignature(req.session.userId).then((result) => {
+        console.log("result get signature", result);
         if (!result) {
             res.render("sign_petition");
             return;
@@ -211,52 +199,57 @@ app.post("/sign_petition", (req, res) => {
 
     let { signature } = req.body;
 
-    createSignatures({ userId, signature }).then((result) => {
-        noSignature = false;
-        req.session.signature = result.signature;
-        req.session.countSignatures = result.count;
-    });
+    createSignatures({ userId, signature })
+        .then((result) => {
+            noSignature = false;
+            req.session.signature = result.signature;
+            req.session.countSignatures = result.count;
+        })
+        .catch((error) => console.log(error));
     res.redirect("/thanks_for_signing"); // !!!!!!!!problem redirect should be inside the (then) line 124 but it dont work, and like this the signature doesnt get passed to the next route
 });
 
 // the Thanks route(after signing the petition)
 app.get("/thanks_for_signing", (req, res) => {
-    console.log(noSignature)
-   // if (!req.cookies.session) res.redirect("login");
+    console.log(noSignature);
+    // if (!req.cookies.session) res.redirect("login");
 
     const { firstName, lastName, userId } = req.session;
     CountSigners().then((result) => {
         req.session.countSignatures = result.count;
+        console.group("sig count", result.count);
         let msg;
         let signature;
 
-        getSignature(userId).then((result) => {
-            if (!result) {
-               return res.render("thanks_for_signing",{noSignature});
-                
-            };
-            signature = result.rows[0].signature;
-            const { countSignatures } = req.session;
-            console.log("result.rows", countSignatures);
-            msg = `  ${
-                countSignatures == 1
-                    ? "vote, you are the first to vote"
-                    : "  people has already signed"
-            } `;
-            res.render("thanks_for_signing", {
-                first: firstName.charAt(0).toUpperCase() + firstName.slice(1),
-                last: lastName.charAt(0).toUpperCase() + lastName.slice(1),
-                countSignatures: countSignatures,
-                thanksMsg: msg,
-                signature: signature,
-                noSignature: noSignature, ////
-            });
-        });
+        getSignature(userId)
+            .then((result) => {
+                if (!result) {
+                    return res.render("thanks_for_signing", { noSignature });
+                }
+                signature = result.rows[0].signature;
+                const { countSignatures } = req.session;
+                console.log("result.rows", countSignatures);
+                msg = `  ${
+                    countSignatures == 1
+                        ? "vote, you are the first to vote"
+                        : "  people has already signed"
+                } `;
+                res.render("thanks_for_signing", {
+                    first:
+                        firstName.charAt(0).toUpperCase() + firstName.slice(1),
+                    last: lastName.charAt(0).toUpperCase() + lastName.slice(1),
+                    countSignatures: countSignatures,
+                    thanksMsg: msg,
+                    signature: signature,
+                    noSignature: noSignature, ////
+                });
+            })
+            .catch((error) => console.log(error));
     });
 });
 
 app.get("/signers", (req, res) => {
-   // if (!req.cookies.session) res.redirect("login");
+    // if (!req.cookies.session) res.redirect("login");
     createDataTable().then((signers) => {
         //console.log("signers",signers)
         res.render("signers", { signers });
@@ -264,7 +257,7 @@ app.get("/signers", (req, res) => {
 });
 
 app.get("/location/:city", (req, res) => {
-    const city = req.params;
+    const city = req.params.city;
     getSignersByCity(city).then((signersProfile) => {
         console.log("SignersByCity", signersProfile);
         res.render("signersByCity", { signersProfile });
@@ -290,15 +283,32 @@ app.post("/edit", (req, res) => {
     let user_id = req.session.userId;
 
     const { firstName, lastName, email, city, homepage, age } = req.body;
+    let cityUpper = city.charAt(0).toUpperCase() + city.slice(1).toLowerCase();
     Promise.all([
-        updateUserProfile({ city, homepage, age, user_id }),
+        updateUserProfile({ cityUpper, homepage, age, user_id }),
         updateUserInfo({ firstName, lastName, email, user_id }),
-    ]).then((result) => {
-        console.log(result)
-        res.redirect("/thanks_for_signing");
-    });
+    ])
+        .then((result) => {
+            let user = result[1].rows[0];
+            let user_profile = result[0].rows[0];
+            req.session.firstName = user.firstname;
+            req.session.lastName = user.lastname;
+            req.session.userId = user.id;
+            req.session.email = user.email;
+            req.session.created_at = user.created_at;
+            req.session.age = user_profile.age;
+            req.session.city = user_profile.city;
+            req.session.homepage = user_profile.homepage;
+            // console.log(
+            //     "user_profile",
+            //     result[0].rows[0],
+            //     "user",
+            //     result[1].rows[0]
+            // );
 
-    ;
+            res.redirect("/thanks_for_signing");
+        })
+        .catch((error) => console.log(error));
 
     // getUserInfo(
     //     { firstName, lastName, email, city, homepage, age, user_id }).then((result) => console.log(result));
@@ -310,10 +320,12 @@ app.post("/deleteProfile", (req, res) => {
         deleteUser_profile(user_id),
         deleteUser(user_id),
         deleteSignature(user_id),
-    ]).then(() => {
-        req.session = null;
-        return res.redirect("login");
-    });
+    ])
+        .then(() => {
+            req.session = null;
+            return res.redirect("login");
+        })
+        .catch((error) => console.log(error));
 });
 
 app.post("/deleteSignature", (req, res) => {
@@ -325,7 +337,6 @@ app.post("/deleteSignature", (req, res) => {
 });
 
 // login route
-
 
 app.listen(PORT, () => {
     console.log(`I'm listening on port ${PORT}`);

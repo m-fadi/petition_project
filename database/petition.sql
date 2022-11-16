@@ -34,7 +34,7 @@ CREATE TABLE users_profiles(
 
 --  psql -d petition -f database/petition.sql;
 -- sudo su postgres;
--- TRUNCATE users_profiles, users RESTART IDENTITY;
+-- TRUNCATE users_profiles, users,signatures RESTART IDENTITY;
 -- delete  from users;
 -- validater.validate(email validation)
 -- sudo service postgresql start;

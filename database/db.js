@@ -68,6 +68,7 @@ function createUser({ firstName, lastName, email, password, created_at }) {
 
 function createSignatures({ userId, signature }) {
     // HOW TO CHECK IF THE USERId already exist in the table????
+
     return db
         .query(
             `INSERT INTO signatures (userId, signature)
@@ -83,7 +84,7 @@ function createSignatures({ userId, signature }) {
         });
 }
 function getSignature(userId) {
-    console.log(userId);
+    //console.log(userId);
     return db
         .query("SELECT * FROM signatures WHERE signatures.userid = $1", [
             userId,
@@ -102,13 +103,13 @@ function CountSigners() {
     });
 }
 
-function createUserProfile({ user_id, age, city, homepage }) {
+function createUserProfile({ user_id, age, cityUpper, homepage }) {
     return db
         .query(
-                    `INSERT INTO users_profiles(user_id, age,city,homepage)
+            `INSERT INTO users_profiles(user_id, age,city,homepage)
             VALUES ($1, $2, $3,$4 )
             RETURNING *`,
-                    [user_id, age, city, homepage]
+            [user_id, age, cityUpper, homepage]
             // ` INSERT INTO users_profiles(user_id,age,city,homepage)
             // VALUES ($1, $2, $3,$4)
             // ON CONFLICT (user_id)
