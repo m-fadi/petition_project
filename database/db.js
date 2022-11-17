@@ -151,7 +151,7 @@ function getSignersByCity(city) {
         )
         .then((result) => {
             console.log("signers at db by city", result.rows);
-            return result.rows; 
+            return result.rows;
         });
 }
 

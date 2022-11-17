@@ -123,7 +123,7 @@ app.get("/", (req, res) => {
     //const cookie = req.session.userId;
 
     //if (cookie) res.redirect("/login");
-    res.render("sign_up");
+    res.redirect("sign_up");
 });
 app.get("/sign_up", (req, res) => {
     //const cookie = req.cookies;
@@ -146,7 +146,7 @@ app.post(
             return res.render("sign_up", { dataNotValid });
         }
         let { firstName, lastName, email, password, signature } = req.body;
-console.log("email from user",email)
+        console.log("email from user", email);
         const created_at = new Date();
         getUserByEmail(email).then((user) => {
             //console.log("user after log in", user);
@@ -154,7 +154,7 @@ console.log("email from user",email)
                 let emailIsUsed = true;
                 return res.render("sign_up", { emailIsUsed });
             }
-            console.log("user data ", user)
+            console.log("user data ", user);
             hash(password).then((password) => {
                 createUser({
                     firstName,
@@ -175,8 +175,8 @@ console.log("email from user",email)
                         res.redirect("/user_profile");
                     })
                     .catch((error) => console.log(error));
-            })
-        })
+            });
+        });
     }
 );
 
@@ -193,7 +193,9 @@ app.post("/user_profile", (req, res) => {
     const { age, city, homepage } = req.body;
 
     if (isNaN(age)) {
-        let dataNotValid = true;
+        {
+            dataNotValid;
+        }
         res.render("user_profile", { dataNotValid });
         return;
     }
@@ -233,9 +235,9 @@ app.post("/sign_petition", (req, res) => {
     createSignatures({ userId, signature })
         .then((result) => {
             noSignature = false;
-           // req.session.signature = result.signature;
+            // req.session.signature = result.signature;
             req.session.countSignatures = result.count;
-             res.redirect("/thanks_for_signing");
+            res.redirect("/thanks_for_signing");
         })
         .catch((error) => console.log(error));
     // !!!!!!!!problem redirect should be inside the (then) line 124 but it dont work, and like this the signature doesnt get passed to the next route
@@ -296,6 +298,11 @@ app.get("/location/:city", (req, res) => {
     });
 });
 
+// app.get("/webpage/:homepage", (req, res) => {
+//     const homepage = req.params.homepage.slice(":");
+// console.log(homepage)
+//    res.redirect("https:" + homepage);
+// });
 app.get("/edit", (req, res) => {
     const { firstName, lastName, age, city, homepage, email } = req.session;
     console.log(email, homepage);
@@ -315,6 +322,10 @@ app.post("/edit", (req, res) => {
     let user_id = req.session.userId;
 
     const { firstName, lastName, email, city, homepage, age } = req.body;
+    if (firstName == "" || lastName == "" || email == "") {
+        let dataNotValid = true;
+        res.render("edit_profile", { dataNotValid });
+    }
     let cityUpper = city.charAt(0).toUpperCase() + city.slice(1).toLowerCase();
     Promise.all([
         updateUserProfile({ cityUpper, homepage, age, user_id }),
@@ -364,7 +375,7 @@ app.post("/deleteSignature", (req, res) => {
     let user_id = req.session.userId;
     deleteSignature(user_id).then(() => {
         noSignature = true;
-       // res.redirect("/sign_petition");
+        // res.redirect("/sign_petition");
         res.redirect("/thanks_for_signing");
     });
 });
