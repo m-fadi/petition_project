@@ -229,8 +229,13 @@ app.get("/sign_petition", (req, res) => {
 
 app.post("/sign_petition", (req, res) => {
     userId = req.session.userId;
+    
 
     let { signature } = req.body;
+    if (signature==="") {
+        req.session.signature=null
+        return res.redirect("/thanks_for_signing")
+    };
 
     createSignatures({ userId, signature })
         .then((result) => {
