@@ -298,11 +298,7 @@ app.get("/location/:city", (req, res) => {
     });
 });
 
-// app.get("/webpage/:homepage", (req, res) => {
-//     const homepage = req.params.homepage.slice(":");
-// console.log(homepage)
-//    res.redirect("https:" + homepage);
-// });
+7;
 app.get("/edit", (req, res) => {
     const { firstName, lastName, age, city, homepage, email } = req.session;
     console.log(email, homepage);
@@ -324,7 +320,15 @@ app.post("/edit", (req, res) => {
     const { firstName, lastName, email, city, homepage, age } = req.body;
     if (firstName == "" || lastName == "" || email == "") {
         let dataNotValid = true;
-        res.render("edit_profile", { dataNotValid });
+        res.render("edit_profile", {
+            firstName,
+            lastName,
+            age,
+            city,
+            homepage,
+            email,
+            dataNotValid,
+        });
     }
     let cityUpper = city.charAt(0).toUpperCase() + city.slice(1).toLowerCase();
     Promise.all([
